@@ -1,4 +1,4 @@
-const http = require("http");
+const http=require("http");
 
 const express = require("express");
 
@@ -17,22 +17,23 @@ app.use(bodyParser.urlencoded({
 const path = require('path');
 
 app.use("/", express.static(path.join(__dirname, "public")));
-const todos = [];
+
+let todos = [];
 
 app.post("/todo/add", (req, res) => {
-
-   const todo = req.body.todo;
-
-   todo.id = "" + new Date().getTime();
-
+   const { inputValue, completed = false } = req.body;
+   const todo = {
+     id: "" + new Date().getTime(), // Genera un ID unico
+     inputValue,
+     completed,
+   };
    todos.push(todo);
-
-   res.json({result: "Ok"});
-
-});
+   res.json({ result: "Ok", todo });
+ });
+ 
 
 app.get("/todo", (req, res) => {
-
+console.log(todos);
    res.json({todos: todos});
 
 });
@@ -44,3 +45,39 @@ server.listen(80, () => {
   console.log("- server running");
 
 });
+
+app.put("/todo/complete", (req, res) => {
+console.log("dentro");
+   let todo = req.body;
+
+   try {
+
+      todos = todos.map((element) => {
+
+         if (element.id === todo.id) {
+
+            element.completed = true;
+
+         }
+
+         return element;
+
+      })
+
+   } catch (e) {
+
+      console.log(e);
+
+   }
+
+   res.json({result: "Ok"});
+
+});
+
+app.delete("/todo/:id", (req, res) => {
+
+   todos = todos.filter((element) => element.id !== req.params.id);
+
+   res.json({result: "Ok"});  
+
+})

@@ -8,80 +8,102 @@ const myKey = "chiave";
 
 
 function loadList() {
-  fetch("https://ws.progettimolinari.it/cache/get", {
-    method: "POST",
+  fetch("/todo", {
+    method: "GET",
     headers: {
       "Content-Type": "application/json",
-      "key": myToken
-    },
-    body: JSON.stringify({
-      key: myKey,
-    })
+    }
   })
   .then(response => response.json())
   .then(data => {
-    list = JSON.parse(data.result);
+    console.log(data.todos);
+    list = data.todos;
     render();
   })
 }
 loadList();
 
 button.onclick = () => {
-  let data = {
-    "inputValue": input.value,
-    "completed": false
+  const data = {
+    inputValue: input.value,
+    completed: false,
   };
-  list.push(data);
-  render();
-  count++;
-  input.value = "";
-  update();
+
+  // Invia il nuovo elemento al server
+  fetch("/todo/add", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+    .then((response) => response.json())
+    .then((result) => {
+      list.push(result.todo); // Aggiorna la lista con l'elemento dal server
+      render();
+      input.value = ""; // Resetta l'input
+    });
 };
 
 function render() {
   let html = "";
   list.forEach((element, id) => {
     let completedClass = element.completed ? "done" : "";
-    html += `<li id='li_${id}' class='divs ${completedClass}'>${element.inputValue}<button type='button' class='pulsantiConferma' id='bottoneC_${id}'>conferma</button><button type='button' class='pulsantiElimina' id='bottoneE_${id}'>elimina</button></li>`;
+    html += `<li id='li_${element.id}' class='divs ${completedClass}'>
+      ${element.inputValue}
+      <button type='button' class='pulsantiConferma' id='bottoneC_${element.id}'>conferma</button>
+      <button type='button' class='pulsantiElimina' id='bottoneE_${element.id}'>elimina</button>
+    </li>`;
   });
   ul.innerHTML = html;
 
-  let eliminaButtons = document.querySelectorAll(".pulsantiElimina");
-  eliminaButtons.forEach((button) => {
+  document.querySelectorAll(".pulsantiElimina").forEach((button) => {
     button.onclick = () => {
-      const id = parseInt(button.id.replace("bottoneE_", ""));
-      list.splice(id, 1);
-      count--;
-      render();
-      update();
+      const id = button.id.replace("bottoneE_", "");
+      remove(id);
     };
   });
 
-  let confermaButtons = document.querySelectorAll(".pulsantiConferma");
-  confermaButtons.forEach((button) => {
+  document.querySelectorAll(".pulsantiConferma").forEach((button) => {
     button.onclick = () => {
-      const id = parseInt(button.id.replace("bottoneC_", ""));
-      list[id].completed = true;
-      render();
-      update();
+      const id = button.id.replace("bottoneC_", "");
+      update(id);
     };
   });
 }
 
-function update() {
-  fetch("https://ws.progettimolinari.it/cache/set", {
-    method: "POST",
+
+function update(id) {
+  const todo = list.find((item) => item.id === id);
+  fetch("/todo/complete", {
+    method: "PUT",
     headers: {
       "Content-Type": "application/json",
-      "key": myToken
     },
-    body: JSON.stringify({
-      key: myKey,
-      value: JSON.stringify(list)
-    })
+    body: JSON.stringify(todo),
   })
-  .then(response => response.json());
-  
+    .then((response) => response.json())
+    .then(() => {
+      if(!todo.completed){
+      todo.completed = true;
+      }else{
+        todo.completed=false
+      } // Aggiorna lo stato localmente
+      render();
+    });
+}
+function remove(id) {
+  fetch(`/todo/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => response.json())
+    .then(() => {
+      list = list.filter((item) => item.id !== id);
+      render();
+    });
 }
 
 render();
