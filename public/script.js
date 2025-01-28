@@ -29,7 +29,6 @@ button.onclick = () => {
     completed: false,
   };
 
-  // Invia il nuovo elemento al server
   fetch("/todo/add", {
     method: "POST",
     headers: {
@@ -39,9 +38,9 @@ button.onclick = () => {
   })
     .then((response) => response.json())
     .then((result) => {
-      list.push(result.todo); // Aggiorna la lista con l'elemento dal server
+      list.push(result.todo); 
       render();
-      input.value = ""; // Resetta l'input
+      input.value = ""; 
     });
 };
 
@@ -88,7 +87,7 @@ function update(id) {
       todo.completed = true;
       }else{
         todo.completed=false
-      } // Aggiorna lo stato localmente
+      } 
       render();
     });
 }

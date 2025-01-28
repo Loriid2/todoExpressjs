@@ -23,7 +23,7 @@ let todos = [];
 app.post("/todo/add", (req, res) => {
    const { inputValue, completed = false } = req.body;
    const todo = {
-     id: "" + new Date().getTime(), // Genera un ID unico
+     id: "" + new Date().getTime(), 
      inputValue,
      completed,
    };
