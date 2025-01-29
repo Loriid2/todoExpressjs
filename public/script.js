@@ -3,9 +3,9 @@ const button = document.getElementById("submit");
 const input = document.getElementById("inputText");
 let list = [];
 let count = 0;
-const myToken = "d6fe87f2-9677-4534-bd39-2a5ae35d8b14";
 const myKey = "chiave";
-
+const modifyText= document.querySelector("#modificaText");
+const modifyButton = document.querySelector("#modifica")
 
 function loadList() {
   fetch("/todo", {
@@ -52,7 +52,10 @@ function render() {
       ${element.inputValue}
       <button type='button' class='pulsantiConferma' id='bottoneC_${element.id}'>conferma</button>
       <button type='button' class='pulsantiElimina' id='bottoneE_${element.id}'>elimina</button>
+      
+
     </li>`;
+    /*<button type='button' class='pulsantiModifica' id='bottoneM_${element.id}'>modifica</button>*/
   });
   ul.innerHTML = html;
 
@@ -69,6 +72,25 @@ function render() {
       update(id);
     };
   });
+ /* document.querySelectorAll(".pulsantiModifica").forEach((button) => {
+    button.onclick = () => {
+      
+      const id = button.id.replace("bottoneM_", "");
+      
+      modifyText.classList.remove("hide")
+      modifyText.classList.add("show")
+      modifyButton.classList.remove("hide")
+      modifyButton.classList.add("show")
+      console.log("text",modifyText.classList)
+      console.log("button",modifyButton.classList)
+      modifyButton.onclick=()=>{
+        modifyText.classList.remove("show")
+        modifyText.classList.add("hide")
+        modify(list[id]);
+      }
+      
+    };
+  });*/
 }
 
 
@@ -101,6 +123,21 @@ function remove(id) {
     .then((response) => response.json())
     .then(() => {
       list = list.filter((item) => item.id !== id);
+      render();
+    });
+}
+function modify(todo) {
+  //const todo = list.find((item) => item.id === id);
+  fetch("/todo/modify", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(todo),
+  })
+    .then((response) => response.json())
+    .then(() => {
+     todo.inputValue= modifyText.value;
       render();
     });
 }

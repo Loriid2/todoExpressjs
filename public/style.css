@@ -33,7 +33,22 @@ body {
     text-align: center;
     color: white;
   } 
+  .pulsantiModifica{
+    background-color: white;
+    margin-left: 5px;
+    margin-right: 5px;
+    border:1px solid;
+    border-radius: 10px;
+    text-align: center;
+    color: black;
+  }
   ul li{
     list-style-type: disc;
     color: white;
+  }
+  .show{
+    display: block;
+  }
+  .hide{
+    display: none;
   }

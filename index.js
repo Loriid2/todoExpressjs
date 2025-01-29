@@ -55,8 +55,7 @@ console.log("dentro");
       todos = todos.map((element) => {
 
          if (element.id === todo.id) {
-
-            element.completed = true;
+            element.completed = !todo.completed;
 
          }
 
@@ -81,3 +80,30 @@ app.delete("/todo/:id", (req, res) => {
    res.json({result: "Ok"});  
 
 })
+app.put("/todo/modify", (req, res) => {
+   console.log("dentro");
+      let todo = req.body;
+   
+      try {
+   
+         todos = todos.map((element) => {
+   
+            if (element.id === todo.id) {
+   
+               element.inputValue = todo.inputValue;
+   
+            }
+   
+            return element;
+   
+         })
+   
+      } catch (e) {
+   
+         console.log(e);
+   
+      }
+   
+      res.json({result: "Ok"});
+   
+   });
