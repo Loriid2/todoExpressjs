@@ -50,7 +50,7 @@ function render() {
     let completedClass = element.completed ? "done" : "";
     html += `<li id='li_${element.id}' class='divs ${completedClass}'>
       ${element.inputValue}
-      <button type='button' class='pulsantiConferma' id='bottoneC_${element.id}'>conferma</button>
+      <button type='button' class='pulsantiConferma' id='bottoneC_${id}'>conferma</button>
       <button type='button' class='pulsantiElimina' id='bottoneE_${element.id}'>elimina</button>
       
 
@@ -95,7 +95,8 @@ function render() {
 
 
 function update(id) {
-  const todo = list.find((item) => item.id === id);
+  console.log(id)
+  const todo = list[id];
   fetch("/todo/complete", {
     method: "PUT",
     headers: {
@@ -114,6 +115,9 @@ function update(id) {
     });
 }
 function remove(id) {
+  console.log(id);
+
+    render();
   fetch(`/todo/${id}`, {
     method: "DELETE",
     headers: {
@@ -122,7 +126,7 @@ function remove(id) {
   })
     .then((response) => response.json())
     .then(() => {
-      list = list.filter((item) => item.id !== id);
+      loadList();
       render();
     });
 }

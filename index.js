@@ -8,11 +8,25 @@ const bodyParser = require('body-parser');
 
 const fs = require('fs');
 
-const mysql = require('mysql');
+const mysql = require('mysql2');
 
 const conf = JSON.parse(fs.readFileSync('conf.json'));
 
-const connection = mysql.createConnection(conf);
+const connection = mysql.createConnection({
+   host: conf.host,
+ 
+    user: conf.user,
+ 
+    password: conf.password,
+ 
+    database: conf.database,
+    
+    port: conf.port,
+
+    ssl : {
+     ca :  fs.readFileSync(__dirname + '/ca.pem')
+    }    
+});
 
 
 app.use(bodyParser.json());
@@ -29,60 +43,53 @@ app.use("/", express.static(path.join(__dirname, "public")));
 
 let todos = [];
 
-app.post("/todo/add", (req, res) => {
-   const { inputValue, completed = false } = req.body;
-   const todo = {
-     id: "" + new Date().getTime(), 
-     inputValue,
-     completed,
-   };
-   todos.push(todo);
-   res.json({ result: "Ok", todo });
+app.post("/todo/add", async (req, res) => {
+   const { inputValue } = req.body;
+   console.log(inputValue)
+   try {
+     const result = await executeQuery("INSERT INTO todo (name) VALUES (?)", [inputValue]);
+     res.json({ result: "Ok", todo: { id: result.insertId, inputValue, completed: false } });
+   } catch (error) {
+     res.status(500).json({ error: "Errore durante l'inserimento" });
+   }
  });
  
 
-app.get("/todo", (req, res) => {
-console.log(todos);
-   res.json({todos: todos});
-
-});
-
-
-app.put("/todo/complete", (req, res) => {
-console.log("dentro");
-   let todo = req.body;
-
+ app.get("/todo", async (req, res) => {
    try {
-
-      todos = todos.map((element) => {
-
-         if (element.id === todo.id) {
-            element.completed = !todo.completed;
-
-         }
-
-         return element;
-
-      })
-
-   } catch (e) {
-
-      console.log(e);
-
+     const todos = await executeQuery("SELECT * FROM todo");
+     const formattedTodos = todos.map(todo => ({
+       id: todo.id,
+       inputValue: todo.name, 
+       completed: todo.completed
+     }));
+     res.json({ todos: formattedTodos });
+   } catch (error) {
+     res.status(500).json({ error: "Errore nel recupero dei dati" });
    }
-
-   res.json({result: "Ok"});
-
 });
 
-app.delete("/todo/:id", (req, res) => {
 
-   todos = todos.filter((element) => element.id !== req.params.id);
+ app.put("/todo/complete", async (req, res) => {
+   const { id, completed } = req.body;
+   console.log(id);
+   try {
+     await executeQuery("UPDATE todo SET completed = ? WHERE id = ?", [!completed, id]);
+     res.json({ result: "Ok" });
+   } catch (error) {
+     res.status(500).json({ error: "Errore durante l'aggiornamento" });
+   }
+ });
 
-   res.json({result: "Ok"});  
-
-})
-app.put("/todo/modify", (req, res) => {
+ app.delete("/todo/:id", async (req, res) => {
+   try {
+     await executeQuery("DELETE FROM todo WHERE id = ?", [req.params.id]);
+     res.json({ result: "Ok" });
+   } catch (error) {
+     res.status(500).json({ error: "Errore durante l'eliminazione" });
+   }
+ });
+/*app.put("/todo/modify", (req, res) => {
    console.log("dentro");
       let todo = req.body;
    
@@ -108,21 +115,21 @@ app.put("/todo/modify", (req, res) => {
    
       res.json({result: "Ok"});
    
-   });
+   });*/
   
-   const executeQuery = (sql) => {
+   const executeQuery = (sql, params = []) => {
       return new Promise((resolve, reject) => {      
-         connection.query(sql, function (err, result) {
+         connection.query(sql, params, function (err, result) {
             if (err) {
                console.error(err);
                reject(err); 
                return; 
             }   
-            console.log('done');
-            resolve(result);         
+            resolve(result);        
          });
       });
    };
+   
    
 const createTable = () => {
    console.log("create table")
@@ -155,7 +162,7 @@ const insert = (todo) => {
       return executeQuery(sql); 
    
    }
-const select = (todo) => {
+const select = () => {
    
       const sql = `
    
@@ -175,9 +182,15 @@ server.listen(80, () => {
 });
 createTable()
    .then(() => {
-     return insert({ name: "test " + new Date().getTime(), completed: false });
+     return console.log("creato")
    })
-   .then(() => select().then("database: "+console.log))
+   .then(() => {
+     return select();
+   })
+   .then((result) => {
+     console.log("DATABASE", result);
+   })
    .catch((err) => {
      console.error("Errore nell'inizializzazione del database:", err);
    });
+

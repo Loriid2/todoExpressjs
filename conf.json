@@ -6,6 +6,12 @@
  
     "password": "AVNS_shOwqgAE9fuVnPNJcYd",
  
-    "database": "defaultdb"	
+    "database": "todoList"	,
+    
+    "port": 14234,
+
+    "ssl" : {
+        "ca": "/ca.pem"
+    }    
  
  }
