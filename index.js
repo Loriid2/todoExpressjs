@@ -51,13 +51,13 @@ app.post("/todo/add", async (req, res) => {
      res.json({ result: "Ok", todo: { id: result.insertId, inputValue, completed: false } });
    } catch (error) {
      res.status(500).json({ error: "Errore durante l'inserimento" });
-   }
+   } 
  });
  
 
  app.get("/todo", async (req, res) => {
    try {
-     const todos = await executeQuery("SELECT * FROM todo");
+     const todos = await select();
      const formattedTodos = todos.map(todo => ({
        id: todo.id,
        inputValue: todo.name, 
@@ -147,21 +147,7 @@ const createTable = () => {
          `);      
    
    }
-const insert = (todo) => {
-   
-      const template = `
-   
-      INSERT INTO todo (name, completed) VALUES ('$NAME', '$COMPLETED')
-   
-         `;
-   
-      let sql = template.replace("$NAME", todo.name);
-   
-      sql = sql.replace("$COMPLETED", todo.completed);
-   
-      return executeQuery(sql); 
-   
-   }
+
 const select = () => {
    
       const sql = `
