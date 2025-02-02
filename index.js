@@ -83,39 +83,15 @@ app.post("/todo/add", async (req, res) => {
 
  app.delete("/todo/:id", async (req, res) => {
    try {
+      console.log("ciao");
      await executeQuery("DELETE FROM todo WHERE id = ?", [req.params.id]);
      res.json({ result: "Ok" });
    } catch (error) {
      res.status(500).json({ error: "Errore durante l'eliminazione" });
    }
  });
-/*app.put("/todo/modify", (req, res) => {
-   console.log("dentro");
-      let todo = req.body;
+
    
-      try {
-   
-         todos = todos.map((element) => {
-   
-            if (element.id === todo.id) {
-   
-               element.inputValue = todo.inputValue;
-   
-            }
-   
-            return element;
-   
-         })
-   
-      } catch (e) {
-   
-         console.log(e);
-   
-      }
-   
-      res.json({result: "Ok"});
-   
-   });*/
   
    const executeQuery = (sql, params = []) => {
       return new Promise((resolve, reject) => {      
@@ -179,4 +155,3 @@ createTable()
    .catch((err) => {
      console.error("Errore nell'inizializzazione del database:", err);
    });
-
