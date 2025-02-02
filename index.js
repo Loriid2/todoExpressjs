@@ -51,7 +51,7 @@ app.post("/todo/add", async (req, res) => {
      res.json({ result: "Ok", todo: { id: result.insertId, inputValue, completed: false } });
    } catch (error) {
      res.status(500).json({ error: "Errore durante l'inserimento" });
-   } 
+   }
  });
  
 
@@ -83,7 +83,6 @@ app.post("/todo/add", async (req, res) => {
 
  app.delete("/todo/:id", async (req, res) => {
    try {
-      console.log("ciao");
      await executeQuery("DELETE FROM todo WHERE id = ?", [req.params.id]);
      res.json({ result: "Ok" });
    } catch (error) {
@@ -91,8 +90,6 @@ app.post("/todo/add", async (req, res) => {
    }
  });
 
-   
-  
    const executeQuery = (sql, params = []) => {
       return new Promise((resolve, reject) => {      
          connection.query(sql, params, function (err, result) {
@@ -123,7 +120,21 @@ const createTable = () => {
          `);      
    
    }
-
+const insert = (todo) => {
+   
+      const template = `
+   
+      INSERT INTO todo (name, completed) VALUES ('$NAME', '$COMPLETED')
+   
+         `;
+   
+      let sql = template.replace("$NAME", todo.name);
+   
+      sql = sql.replace("$COMPLETED", todo.completed);
+   
+      return executeQuery(sql); 
+   
+   }
 const select = () => {
    
       const sql = `
@@ -136,12 +147,6 @@ const select = () => {
    
    }  
 const server = http.createServer(app);
-
-server.listen(80, () => {
-
-  console.log("- server running");
-
-});
 createTable()
    .then(() => {
      return console.log("creato")
@@ -155,3 +160,9 @@ createTable()
    .catch((err) => {
      console.error("Errore nell'inizializzazione del database:", err);
    });
+
+server.listen(80, () => {
+
+  console.log("- server running");
+
+});
